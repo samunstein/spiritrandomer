@@ -1,5 +1,6 @@
 import { Component } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import "./navbar.css";
 
 class Navbar extends Component {
     constructor(props: any) {
@@ -8,14 +9,11 @@ class Navbar extends Component {
 
     render() {
         return (
-            <ul>
-                <li>
-                    <Link to="/spirits">Spirits</Link>
-                </li>
-                <li>
-                    <Link to="/invaders">Invaders</Link>
-                </li>
-            </ul>
+            <div className="navbar">
+                <NavLink to="/spirits" activeClassName="active"><div>Spirits</div></NavLink>
+                <NavLink to="/invaders" activeClassName="active"><div>Invaders</div></NavLink>
+            </div>
+            
         )
     }
 }

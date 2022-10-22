@@ -3,12 +3,13 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
-  Redirect
+  Redirect,
+  useLocation
 } from "react-router-dom";
 import SpiritsView, { initialState as spiritsViewInitialState, SpiritsViewState } from "./spirits/spiritsView";
 import InvadersView from "./invaders/invadersView";
-import Navbar from "./navbar/Navbar";
+import Navbar from "./navbar/navbar";
+import "./App.css"
 
 interface AppState {
   spiritView: SpiritsViewState,
@@ -22,7 +23,7 @@ export default class App extends React.Component<any, AppState> {
   render() {
     return (
       <Router>
-        <div>
+        <div className="app">
           <Navbar />
           <Switch>
             <Route exact path="/" render = {() => {return (<Redirect to="/spirits" />)}} />
