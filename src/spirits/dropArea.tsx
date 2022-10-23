@@ -1,9 +1,9 @@
 import { useDrop } from 'react-dnd'
-import { SpiritData, SpiritsViewState } from './spiritData'
+import { SpiritsViewState } from './spiritData'
 
-export default function DropArea({children, dropFn, state}: {
+export default function SpiritDropArea({children, dropFn, state}: {
     children?: 
-        string 
+          string 
         | number 
         | React.ReactElement<any, string | React.JSXElementConstructor<any>> 
         | string[] 

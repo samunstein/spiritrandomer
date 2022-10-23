@@ -20,6 +20,10 @@
     opacity: 10%;
 }
 
+.spirit-panel.dim img {
+    opacity: 20%;
+}
+
 .spirit-stats {
     position: absolute;
     text-align: left;
@@ -33,10 +37,6 @@
 .spirit-name {
     margin: 0 5px 2px;
     text-align: center;
-}
-
-.spirit-panel.dim img {
-    opacity: 20%;
 }
 
 .spirit-panel.dim:before, .spirit-panel.dim:after {

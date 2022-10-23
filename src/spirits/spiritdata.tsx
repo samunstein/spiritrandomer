@@ -101,7 +101,6 @@ export const spirits: ReadonlyArray<SpiritData> = [
     {name: "Fathomless Mud of the Swamp", complexity: Complexity.Low, offense: 12, control: 8, fear: 12, defense: 12, utility: 8, image: "mud.png", expansion: Expansion.Horizons},
     {name: "Rising Heat of Stone and Sand", complexity: Complexity.Low, offense: 20, control: 12, fear: 4, defense: 8, utility: 12, image: "heat.png", expansion: Expansion.Horizons},
     {name: "Sun-Bright Whirlwind", complexity: Complexity.Low, offense: 12, control: 20, fear: 4, defense: 4, utility: 12, image: "whirlwind.png", expansion: Expansion.Horizons},
-
 ];
 
 export interface SpiritState {

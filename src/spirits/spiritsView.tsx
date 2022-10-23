@@ -4,7 +4,7 @@ import Spirit from "./spiritPanel"
 import "./spiritsView.css";
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import DropArea from "./dropArea";
+import SpiritDropArea from "./dropArea";
 
 const MAD_SLIDER_SMOOTHNESS = 40;
 
@@ -260,11 +260,11 @@ function SpiritsView({state, updateState}: StateProps) {
                     <span>Stats good at: </span>
                     {statList.map(stat => <span className={`parameter-choice ${state.prominentStatsToShow.includes(stat) ? "chosen" : ""}`} onClick={() => flipStatShow(stat)}>{stat}</span>)}
                 </div>
-                <DropArea state={state} dropFn={(name: string) => unchoose(name)}>
+                <SpiritDropArea state={state} dropFn={(name: string) => unchoose(name)}>
                     <div className="unchosen-area">
                         {state.available.filter(filterSpiritByShowParameters).map((spirit: SpiritState) => <Spirit spiritData={spirit.data} dim={spirit.disabled} onClick={() => flipDisabled(spirit)} />)}
                     </div>
-                </DropArea>
+                </SpiritDropArea>
             </div>
             
             <div>
@@ -272,16 +272,16 @@ function SpiritsView({state, updateState}: StateProps) {
                 <div className="show-parameter-button">
                     <span className="randomer-button" onClick={trashTeam}>Trash team</span>
                 </div>
-                <DropArea state={state} dropFn={(name: string) => choose(name)}>
+                <SpiritDropArea state={state} dropFn={(name: string) => choose(name)}>
                     <div className="chosen-area">
                         {state.chosen.map((spirit: SpiritState) => <Spirit spiritData={spirit.data} dim={spirit.disabled} onClick={() => ""} />)}
                     </div>
-                </DropArea>
+                </SpiritDropArea>
             </div>
 
             <div>
                 <div className="stats-result">
-                    <div>Team stats</div>
+                    <div className="stats-heading">Team stats</div>
                     <div className="stats-area">
                         <div className="spirit-stat-list">
                             <div className="spirit-stat-header">
@@ -306,7 +306,7 @@ function SpiritsView({state, updateState}: StateProps) {
                         <span>{maxDecimal(actualMADTargetValue())}</span>
                     </div>
                     <div className="balance-direction">
-                        <div className="randomer-parameter-heading">Direction from balance target?</div>
+                        <div className="randomer-parameter-heading">Direction from MAD treshold?</div>
                         <div>
                             <span onClick={() => randomTowardsBalance(true)} className={`parameter-choice ${state.randomTowardsBalance ? "chosen" : ""}`}>Balance</span> 
                             <span className={`parameter-choice ${!state.randomTowardsBalance ? "chosen" : ""}` } onClick={() => randomTowardsBalance(false)}>Imbalance</span>
