@@ -7,20 +7,22 @@ import {
 } from "react-router-dom";
 import SpiritsView, { initialState as spiritsViewInitialState } from "./spirits/spiritsView";
 import { SpiritsViewState } from "./spirits/spiritData";
-import InvadersView from "./invaders/invadersView";
+import InvadersView, {initialState as invadersViewInitialState } from "./invaders/invadersView";
 import Navbar from "./navbar/navbar";
 import "./App.css"
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
+import { InvadersViewState } from "./invaders/invaderData";
 
 interface AppState {
-  spiritView: SpiritsViewState,
+  spiritView: SpiritsViewState;
+  invaderView: InvadersViewState;
 }
 
 export default class App extends React.Component<any, AppState> {
   constructor(props: any) {
       super(props);
-      this.state = {spiritView: spiritsViewInitialState()}
+      this.state = {spiritView: spiritsViewInitialState(), invaderView: invadersViewInitialState()};
   }
   render() {
     return (
@@ -36,7 +38,9 @@ export default class App extends React.Component<any, AppState> {
                 }} />
               </Route>
               <Route path="/invaders">
-                <InvadersView />
+                <InvadersView state={this.state.invaderView} updateState={(update) => {
+                  this.setState((prev) => ({...prev, invaderView: update}))
+                }} />
               </Route>
             </Switch>
           </DndProvider>
