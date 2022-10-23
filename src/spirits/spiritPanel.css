@@ -1,0 +1,61 @@
+.spirit-panel {
+    width: 135px;
+    border: 1px solid var(--color-spirit-blue);
+    margin: 5px;
+
+    position: relative;
+    overflow: hidden;
+
+    text-align: center;
+    min-height: 135px;
+
+    font-size: 12px;
+}
+
+.spirit-panel > img {
+    max-width: 100%;
+}
+
+.spirit-panel > img.hover {
+    opacity: 10%;
+}
+
+.spirit-stats {
+    position: absolute;
+    text-align: left;
+    width: 100%;
+}
+
+.spirit-stat-complexity {
+    margin: 2px 5px;
+}
+
+.spirit-name {
+    margin: 0 5px 2px;
+    text-align: center;
+}
+
+.spirit-panel.dim img {
+    opacity: 20%;
+}
+
+.spirit-panel.dim:before, .spirit-panel.dim:after {
+    position: absolute;
+    content: '';
+    background: red;
+    display: block;
+    width: 100%;
+    height: 10px;
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+
+.spirit-panel.dim:after {
+    -webkit-transform: rotate(45deg);    
+    transform: rotate(45deg);
+}

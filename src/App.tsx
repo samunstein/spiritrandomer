@@ -4,12 +4,14 @@ import {
   Switch,
   Route,
   Redirect,
-  useLocation
 } from "react-router-dom";
-import SpiritsView, { initialState as spiritsViewInitialState, SpiritsViewState } from "./spirits/spiritsView";
+import SpiritsView, { initialState as spiritsViewInitialState } from "./spirits/spiritsView";
+import { SpiritsViewState } from "./spirits/spiritData";
 import InvadersView from "./invaders/invadersView";
 import Navbar from "./navbar/navbar";
 import "./App.css"
+import {DndProvider} from 'react-dnd';
+import {HTML5Backend} from 'react-dnd-html5-backend';
 
 interface AppState {
   spiritView: SpiritsViewState,
@@ -24,17 +26,23 @@ export default class App extends React.Component<any, AppState> {
     return (
       <Router>
         <div className="app">
-          <Navbar />
-          <Switch>
-            <Route exact path="/" render = {() => {return (<Redirect to="/spirits" />)}} />
-            <Route path="/spirits">
-              <SpiritsView state={this.state.spiritView} updateState={(update) => this.setState((prev) => ({...prev, spiritView: update}))} />
-            </Route>
-            <Route path="/invaders">
-              <InvadersView />
-            </Route>
-          </Switch>
+          <DndProvider backend={HTML5Backend}>
+            <Navbar />
+            <Switch>
+              <Route exact path="/" render = {() => {return (<Redirect to="/spirits" />)}} />
+              <Route path="/spirits">
+                <SpiritsView state={this.state.spiritView} updateState={(update) => {
+                  this.setState((prev) => ({...prev, spiritView: update}))
+                }} />
+              </Route>
+              <Route path="/invaders">
+                <InvadersView />
+              </Route>
+            </Switch>
+          </DndProvider>
         </div>
+        
+        
       </Router>
     )
   }

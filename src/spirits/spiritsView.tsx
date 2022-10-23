@@ -1,34 +1,23 @@
-import { createShorthandPropertyAssignment } from "typescript";
-import { Complexity, complexityList, getMajorStatList, SpiritData, spirits, Stat, statList } from "./spiritData";
+import { Expansion, expansionList, maxDecimal } from "../globals";
+import { Complexity, complexityList, getMajorStatList, getStatColor, MAX_STAT, SpiritData, spirits, SpiritState, SpiritsViewState, Stat, statList } from "./spiritData";
 import Spirit from "./spiritPanel"
 import "./spiritsView.css";
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import DropArea from "./dropArea";
 
-const MAD_SLIDER_SMOOTHNESS = 50;
-
-interface SpiritState {
-    data: SpiritData;
-    disabled: boolean;
-}
-
-export interface SpiritsViewState {
-    available: ReadonlyArray<SpiritState>;
-    chosen: ReadonlyArray<SpiritState>;
-    madSliderRawValue: number;
-    randomTowardsBalance: boolean;
-    numberOfSpiritsToRandomize: number;
-    complexitiesToShow: ReadonlyArray<Complexity>;
-    prominentStatsToShow: ReadonlyArray<Stat>;
-}
+const MAD_SLIDER_SMOOTHNESS = 40;
 
 export function initialState(): SpiritsViewState {
     return { 
         available: spirits.map(spirit => ({data: spirit, disabled: false})), 
         chosen: [], 
-        madSliderRawValue: MAD_SLIDER_SMOOTHNESS / 2, 
+        madSliderRawValue: MAD_SLIDER_SMOOTHNESS / 4, 
         randomTowardsBalance: true, 
         numberOfSpiritsToRandomize: 4,
         complexitiesToShow: complexityList,
-        prominentStatsToShow: statList
+        prominentStatsToShow: statList,
+        expansionsToShow: expansionList
     };
 }
 
@@ -38,21 +27,41 @@ interface StateProps {
 }
 
 function SpiritsView({state, updateState}: StateProps) {
-    function choose(chosen: SpiritState) {
-
+    function flipDisabled(toFlip: SpiritState) {
         updateState({
-            ...state, 
-            available: state.available.filter(spirit => spirit.data.name !== chosen.data.name),
-            chosen: [...state.chosen.filter(spirit => spirit.data.name !== chosen.data.name), chosen]
+            ...state,
+            available: state.available.map(spirit => {
+                if (spirit !== toFlip) return spirit
+                else return {...spirit, disabled: !spirit.disabled};
+            }),
+            chosen: state.chosen.map(spirit => {
+                if (spirit !== toFlip) return spirit
+                else return {...spirit, disabled: !spirit.disabled};
+            })
         })
     }
 
-    function unchoose(unchosen: SpiritState) {
-        updateState({
-            ...state, 
-            available: [...state.available.filter(spirit => spirit.data.name !== unchosen.data.name), unchosen],
-            chosen: state.chosen.filter(spirit => spirit.data.name !== unchosen.data.name)
-        })
+    function choose(toChoose: string) {
+        const spiritState = state.available.find(spirit => spirit.data.name === toChoose);
+        if (spiritState !== undefined) {
+            updateState({
+                ...state, 
+                available: state.available.filter(spirit => spirit.data.name !== spiritState.data.name),
+                chosen: [...state.chosen.filter(spirit => spirit.data.name !== spiritState.data.name), {...spiritState, disabled: false}]
+            });
+        }        
+    }
+
+    function unchoose(toUnchoose: string) {
+        const spiritState = state.chosen.find(spirit => spirit.data.name === toUnchoose);
+
+        if (spiritState !== undefined) {
+            updateState({
+                ...state, 
+                available: [...state.available.filter(spirit => spirit.data.name !== spiritState.data.name), spiritState],
+                chosen: state.chosen.filter(spirit => spirit.data.name !== spiritState.data.name)
+            });
+        }
     }
 
     function getSpiritsStatAverage(stat: Stat, spirits: ReadonlyArray<SpiritState>): number {
@@ -78,7 +87,7 @@ function SpiritsView({state, updateState}: StateProps) {
     }
 
     function actualMADTargetValue(): number {
-        return Math.pow(state.madSliderRawValue / MAD_SLIDER_SMOOTHNESS * 2, 2) * 2.5;
+        return state.madSliderRawValue / MAD_SLIDER_SMOOTHNESS * 10;
     }
 
     function randomTowardsBalance(is: boolean): void {
@@ -89,9 +98,10 @@ function SpiritsView({state, updateState}: StateProps) {
         updateState({...state, numberOfSpiritsToRandomize: num});
     }
 
-    function filterSpiritByComplexityAndStatType(spirit: SpiritState): boolean {
+    function filterSpiritByShowParameters(spirit: SpiritState): boolean {
         if (!state.complexitiesToShow.includes(spirit.data.complexity)) return false;
         if (!getMajorStatList(spirit.data).map(stat => state.prominentStatsToShow.includes(stat)).includes(true)) return false;
+        if (!state.expansionsToShow.includes(spirit.data.expansion)) return false;
         return true;
     }
 
@@ -111,8 +121,16 @@ function SpiritsView({state, updateState}: StateProps) {
         }
     }
 
+    function flipExpansionShow(exp: Expansion): void {
+        if (state.expansionsToShow.includes(exp)) {
+            updateState({...state, expansionsToShow: state.expansionsToShow.filter(existing => exp !== existing)});
+        } else {
+            updateState({...state, expansionsToShow: [...state.expansionsToShow, exp]});
+        }
+    }
+
     function getRandomableSpirits(): ReadonlyArray<SpiritState> {
-        return state.available.filter(filterSpiritByComplexityAndStatType).filter(spirit => !spirit.disabled);
+        return state.available.filter(filterSpiritByShowParameters).filter(spirit => !spirit.disabled);
     }
 
     function getRandomInt(min: number, max: number) {
@@ -181,13 +199,21 @@ function SpiritsView({state, updateState}: StateProps) {
         }
     }
 
+    function trashTeam(): void {
+        updateState({
+            ...state,
+            chosen: [],
+            available: [...state.available, ...state.chosen]
+        });
+    }
+
     function doRandom(): void {
         let spiritsLeftToRandom = Math.max(state.numberOfSpiritsToRandomize - state.chosen.length, 0);
         
         const carefulRandom = Math.min(1, spiritsLeftToRandom);
         spiritsLeftToRandom -= carefulRandom;
 
-        const selectiveRandom = Math.min(Math.ceil(state.numberOfSpiritsToRandomize / 2), spiritsLeftToRandom);
+        const selectiveRandom = Math.min(Math.ceil(state.numberOfSpiritsToRandomize / 2) - 1, spiritsLeftToRandom);
         spiritsLeftToRandom -= selectiveRandom;
 
         const fullRandom = spiritsLeftToRandom;
@@ -212,10 +238,20 @@ function SpiritsView({state, updateState}: StateProps) {
         });
     }
 
+    function getStatDivStyle(stat: Stat): React.CSSProperties {
+        const value = getSpiritsStatAverage(stat, state.chosen);
+        const len = Math.min(Math.max(value / MAX_STAT * 100, 0), 100);
+        return {width: `${len}%`, backgroundColor: getStatColor(stat)};
+    }
+
     return (
         <div className="spirit-page">
             <div className="unchosen-side">
                 <div className="drop-area-heading">Spirits to choose from</div>
+                <div className="show-parameter-area">
+                    <span>Expansion: </span>
+                    {expansionList.map(exp => <span className={`parameter-choice ${state.expansionsToShow.includes(exp) ? "chosen" : ""}`} onClick={() => flipExpansionShow(exp)}>{exp}</span>)}
+                </div>
                 <div className="show-parameter-area">
                     <span>Complexities: </span>
                     {complexityList.map(complexity => <span className={`parameter-choice ${state.complexitiesToShow.includes(complexity) ? "chosen" : ""}`} onClick={() => flipComplexityShow(complexity)}>{complexity}</span>)}
@@ -224,24 +260,38 @@ function SpiritsView({state, updateState}: StateProps) {
                     <span>Stats good at: </span>
                     {statList.map(stat => <span className={`parameter-choice ${state.prominentStatsToShow.includes(stat) ? "chosen" : ""}`} onClick={() => flipStatShow(stat)}>{stat}</span>)}
                 </div>
-                <div className="unchosen-area">
-                    {state.available.filter(filterSpiritByComplexityAndStatType).map((spirit: SpiritState) => <div onClick={() => choose(spirit)}><Spirit spiritData={spirit.data} dim={spirit.disabled} /></div>)}
-                </div>
+                <DropArea state={state} dropFn={(name: string) => unchoose(name)}>
+                    <div className="unchosen-area">
+                        {state.available.filter(filterSpiritByShowParameters).map((spirit: SpiritState) => <Spirit spiritData={spirit.data} dim={spirit.disabled} onClick={() => flipDisabled(spirit)} />)}
+                    </div>
+                </DropArea>
             </div>
             
             <div>
                 <div className="drop-area-heading">Spirits chosen</div>
-                <div className="chosen-area">
-                    {state.chosen.map((spirit: SpiritState) => <div onClick={() => unchoose(spirit)}><Spirit spiritData={spirit.data} dim={spirit.disabled} /></div>)}
+                <div className="show-parameter-button">
+                    <span className="randomer-button" onClick={trashTeam}>Trash team</span>
                 </div>
+                <DropArea state={state} dropFn={(name: string) => choose(name)}>
+                    <div className="chosen-area">
+                        {state.chosen.map((spirit: SpiritState) => <Spirit spiritData={spirit.data} dim={spirit.disabled} onClick={() => ""} />)}
+                    </div>
+                </DropArea>
             </div>
 
             <div>
                 <div className="stats-result">
                     <div>Team stats</div>
                     <div className="stats-area">
-                        {statList.map(stat => <div>{stat}: {getSpiritsStatAverage(stat, state.chosen)}</div>)}
-                        <div>MAD: {getSpiritStatsMAD(state.chosen)}</div>
+                        <div className="spirit-stat-list">
+                            <div className="spirit-stat-header">
+                                {statList.map(stat => <div>{stat}</div>)}
+                            </div>
+                            <div className="spirit-stat-values">
+                                {statList.map(stat => <div style={getStatDivStyle(stat)}>{maxDecimal(getSpiritsStatAverage(stat, state.chosen))}</div>)}
+                            </div>
+                        </div>
+                        <div className="mad-result">MAD: {maxDecimal(getSpiritStatsMAD(state.chosen))}</div>
                     </div>
                 </div>
                 
@@ -253,7 +303,7 @@ function SpiritsView({state, updateState}: StateProps) {
                     <div className="slider">
                         <div className="randomer-parameter-heading">Treshold Mean Absolute Deviation (MAD)?</div>
                         <input type="range" min="0" max={MAD_SLIDER_SMOOTHNESS} step="1" onChange={sliderMoved} value={state.madSliderRawValue}></input>
-                        <span>{actualMADTargetValue().toFixed(2)}</span>
+                        <span>{maxDecimal(actualMADTargetValue())}</span>
                     </div>
                     <div className="balance-direction">
                         <div className="randomer-parameter-heading">Direction from balance target?</div>
