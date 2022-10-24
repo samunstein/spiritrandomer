@@ -261,7 +261,7 @@ function SpiritsView({state, updateState}: StateProps) {
                 </SpiritDropArea>
             </div>
             
-            <div>
+            <div className="chosen-side">
                 <div className="drop-area-heading">Spirits chosen</div>
                 <div className="show-parameter-button">
                     <span className="randomer-button" onClick={trashTeam}>Trash team</span>

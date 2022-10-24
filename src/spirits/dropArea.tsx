@@ -23,7 +23,7 @@ export default function SpiritDropArea({children, dropFn, state}: {
         }), [state])
     
     return (
-        <div ref={drop} className={isOver ? "dragging-over" : ""}>
+        <div ref={drop} className={`drop-area ${isOver ? "dragging-over" : ""}`}>
             {children}
         </div>
     )

@@ -207,7 +207,7 @@ function InvadersView({state, updateState}: StateProps) {
                 </InvaderDropArea>
             </div>
             
-            <div>
+            <div className="chosen-side">
                 <div className="drop-area-heading">Rulesets chosen</div>
                 <div className="show-parameter-button">
                     <span className="randomer-button" onClick={trashRules}>Trash rules</span>

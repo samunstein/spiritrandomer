@@ -12,7 +12,9 @@ import Navbar from "./navbar/navbar";
 import "./App.css"
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
+import {TouchBackend} from 'react-dnd-touch-backend';
 import { InvadersViewState } from "./invaders/invaderData";
+import {isMobile} from 'react-device-detect';
 
 interface AppState {
   spiritView: SpiritsViewState;
@@ -43,7 +45,7 @@ export default function App({_}: any) {
 
   return (
     <div className="app" style={getRouteTheme()}>
-      <DndProvider backend={HTML5Backend}>
+      <DndProvider backend={isMobile ? TouchBackend : HTML5Backend}>
         <Navbar />
         <Switch>
           <Route exact path="/" render = {() => {return (<Redirect to="/spirits" />)}} />
