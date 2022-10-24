@@ -64,8 +64,10 @@ export type RuleState = {
 export interface InvadersViewState {
     available: ReadonlyArray<RuleState>;
     chosen: ReadonlyArray<ChosenAdversary | Scenario>;
-    difficultySliderMin: number;
-    difficultySliderMax: number;
+    difficultySlider: {
+        min: number;
+        max: number;
+    };
     rulesToShow: ReadonlyArray<RuleType>;
     expansionsToShow: ReadonlyArray<Expansion>;
 };

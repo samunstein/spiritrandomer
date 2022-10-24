@@ -1,0 +1,15 @@
+.difficulty-slider-area {
+    display: flex;
+}
+
+.difficulty-slider-result {
+    width: 60px;
+    text-align: right;
+    margin: 0 15px 0 5px;
+    transform: translate(0, -6px);
+}
+
+.difficulty-slider {
+    flex: 1 1 100%;
+    margin: 0 5px;
+}

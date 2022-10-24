@@ -1,20 +1,25 @@
-import { Expansion, expansionList } from "../globals";
+import { chooseRandom, Expansion, expansionList } from "../globals";
 import AdversaryPanel from "./adversaryPanel";
 import InvaderDropArea from "./dropArea";
-import { adversaries, ChosenAdversary, InvadersViewState, RuleState, RuleType, Scenario, scenarios, showableRulesList } from "./invaderData";
+import { adversaries, Adversary, ChosenAdversary, InvadersViewState, RuleState, RuleType, Scenario, scenarios, showableRulesList } from "./invaderData";
 import ScenarioPanel from "./scenarioPanel";
+import { getTrackBackground, Range as InputRange } from 'react-range';
+import { strictEqual } from "assert";
+import "./invadersView.css";
 
 interface StateProps {
     state: InvadersViewState;
     updateState: (newState: InvadersViewState) => void
 }
 
+const DIFFICULTY_MIN = 0;
+const DIFFICULTY_MAX = 15;
+
 export function initialState(): InvadersViewState {
     return { 
         available: [...adversaries.map(adv => ({data: adv, disabled: false})), ...scenarios.map(sce => ({data: sce, disabled: false}))], 
         chosen: [], 
-        difficultySliderMin: 0,
-        difficultySliderMax: 15,
+        difficultySlider: {min: DIFFICULTY_MIN, max: DIFFICULTY_MAX},
         rulesToShow: showableRulesList.filter(r => r !== RuleType.SpecialScenario),
         expansionsToShow: expansionList
     };
@@ -75,8 +80,54 @@ function InvadersView({state, updateState}: StateProps) {
         });
     }
 
+    function distinct<T>(arr: ReadonlyArray<T>): ReadonlyArray<T> {
+        return arr.filter((n, i) => arr.indexOf(n) === i);
+    }
+
+    function distanceFromRange(val: number, min: number, max: number): number {
+        return Math.max(Math.max(0, min - val), Math.max(0, val - max));
+    }
+
+    function arrayValuesOverlap(arr1: ReadonlyArray<number>, arr2: ReadonlyArray<number>): boolean {
+        return arr1.map(v => arr2.indexOf(v) !== -1).includes(true);
+    }
+
     function doRandom(): void {
-        // TODO
+        const scenarioNotAlreadyChosen = state.chosen.map(rule => rule.type).filter(t => t === RuleType.Scenario || t === RuleType.SpecialScenario).length === 0;
+        const adversaryNotAlreadyChosen = state.chosen.map(rule => rule.type).filter(t => t === RuleType.Adversary).length === 0;
+
+        const available = state.available.filter(filterRulesByShowParameters).filter(rule => !rule.disabled).map(rule => rule.data)
+        const scenariosToChooseFrom: ReadonlyArray<Scenario> = scenarioNotAlreadyChosen 
+            ? available.filter((rule): rule is Scenario => rule.type === RuleType.Scenario || rule.type === RuleType.SpecialScenario)
+            : [];
+        const adversariesToChooseFrom: ReadonlyArray<Adversary> = adversaryNotAlreadyChosen
+            ? available.filter((rule): rule is Adversary => rule.type === RuleType.Adversary).map(rule => rule as Adversary)
+            : [];
+
+        const targetAddedDifficulty = {min: state.difficultySlider.min - getTotalDifficulty(), max: state.difficultySlider.max - getTotalDifficulty()};
+
+        const scenarioDifficulties = distinct([...scenariosToChooseFrom.map(sc => sc.difficulty), 0]);
+        const adversaryDifficulties = distinct([...adversariesToChooseFrom.map(ad => ad.difficulties).flat(), 0]);
+
+        const difficultyMatrix = scenarioDifficulties.map(sced => adversaryDifficulties.map(advd => ({
+            scenario: sced, adversary: advd, score: distanceFromRange(sced + advd, targetAddedDifficulty.min, targetAddedDifficulty.max) + (advd ? 0 : 0.1)
+        }))).flat();
+        const bestScore = Math.min(...difficultyMatrix.map(dif => dif.score));
+        const bestDifficulties = difficultyMatrix.filter(dif => dif.score === bestScore);
+
+        const chosenScenario = scenariosToChooseFrom.length ? chooseRandom(scenariosToChooseFrom.filter(sce => bestDifficulties.map(dif => dif.scenario).includes(sce.difficulty))) : undefined;
+        const adversaryDifficultiesShort = bestDifficulties.filter(dif => dif.scenario === (chosenScenario ? chosenScenario.difficulty : 0)).map(dif => dif.adversary);
+
+        const chosenAdversary = adversariesToChooseFrom.length ? chooseRandom(adversariesToChooseFrom.filter(adv => arrayValuesOverlap(adv.difficulties, adversaryDifficultiesShort))) : undefined;
+        const chosenAdversaryDifficulty = chosenAdversary ? chosenAdversary.difficulties.indexOf(chooseRandom(chosenAdversary.difficulties.filter(dif => adversaryDifficultiesShort.includes(dif)))) : undefined;
+
+        const chosen: ReadonlyArray<Scenario | ChosenAdversary> = [chosenScenario, (chosenAdversaryDifficulty !== undefined ? {...chosenAdversary, chosenLevel: chosenAdversaryDifficulty} : undefined)].filter((v): v is Scenario | ChosenAdversary => v !== undefined);
+
+        updateState({
+            ...state,
+            available: state.available.filter(av => !chosen.map(c => c.name).includes(av.data.name)),
+            chosen: [...state.chosen.filter(ch => !chosen.map(c => c.name).includes(ch.name)), ...chosen]
+        });
     }
 
     function filterRulesByShowParameters(rule: RuleState): boolean {
@@ -123,6 +174,10 @@ function InvadersView({state, updateState}: StateProps) {
                 }
             }
         }).reduce((acc, next) => acc + next, 0);
+    }
+
+    function difficultySliderChange([first, second]: [number, number]): void {
+        updateState({...state, difficultySlider: {min: Math.min(first, second), max: Math.max(first, second)}})
     }
 
     return (
@@ -181,7 +236,45 @@ function InvadersView({state, updateState}: StateProps) {
                 </div>
                 
                 <div className="randomer">
-                    <div>Tähän se difficulty valinta</div>
+                    <div>Set wanted difficulty:</div>
+                    <div className="difficulty-slider-area">
+                        <div className="difficulty-slider">
+                            <InputRange min={DIFFICULTY_MIN} max={DIFFICULTY_MAX} 
+                                values={[state.difficultySlider.min, state.difficultySlider.max]} 
+                                onChange={(values: any) => difficultySliderChange(values as [number, number])}
+                                draggableTrack
+                                renderTrack={({ props, children }) => (
+                                    <div
+                                        {...props}
+                                        style={{
+                                            ...props.style,
+                                            height: '8px',
+                                            background: `${getTrackBackground({
+                                                min: DIFFICULTY_MIN,
+                                                max: DIFFICULTY_MAX,
+                                                values: [state.difficultySlider.min, state.difficultySlider.max],
+                                                colors: ["#fff", "var(--theme-color)", "#fff"]
+                                            })}`
+                                            }}
+                                        >
+                                        {children}
+                                    </div>
+                                )}
+                                renderThumb={({ props }) => (
+                                    <div
+                                    {...props}
+                                    style={{
+                                        ...props.style,
+                                        height: '25px',
+                                        width: '25px',
+                                        borderRadius: "100%",
+                                        backgroundColor: "var(--theme-color)"
+                                    }}
+                                    />
+                            )} />
+                        </div>
+                        <div className="difficulty-slider-result">{state.difficultySlider.min}-{state.difficultySlider.max}</div>
+                    </div>
                     <div className="randomer-execute">
                         <span className="randomer-button" onClick={doRandom}>Make me a game!</span>
                     </div>

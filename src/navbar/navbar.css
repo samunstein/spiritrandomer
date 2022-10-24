@@ -5,7 +5,7 @@
     height: 50px;
     align-items: center;
     font-size: 36px;
-    border-bottom: 3px solid var(--color-spirit-blue);
+    border-bottom: 3px solid var(--theme-color);
 }
 
 .navbar a {
@@ -19,5 +19,5 @@
 }
 
 .navbar a.active {
-    background-color: var(--color-spirit-blue);
+    background-color: var(--theme-color);
 }

@@ -17,7 +17,7 @@
     flex-direction: row;
     flex-wrap: wrap;
 
-    border: 2px dashed var(--color-spirit-blue);
+    border: 2px dashed var(--theme-color);
     border-radius: 15px;
 
     min-height: 135px;
@@ -40,11 +40,11 @@
     cursor: pointer;
     padding: 0 3px;
     margin: 2px;
-    border-bottom: 2px solid var(--color-spirit-blue);
+    border-bottom: 2px solid var(--theme-color);
 }
 
 .parameter-choice.chosen {
-    background-color: var(--color-spirit-blue);
+    background-color: var(--theme-color);
 }
 
 .numbers span {
@@ -69,7 +69,7 @@
     margin-top: 40px;
 }
 .randomer-button {
-    background-color: var(--color-spirit-blue);
+    background-color: var(--theme-color);
     border-radius: 10px;
     padding: 5px 20px;
     cursor: pointer;
@@ -97,5 +97,5 @@
 }
 
 .dragging-over .chosen-area, .dragging-over .unchosen-area {
-    background-color: var(--color-spirit-blue);
+    background-color: var(--theme-color);
 }

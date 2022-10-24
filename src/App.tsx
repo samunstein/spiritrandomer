@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
+  useLocation,
 } from "react-router-dom";
 import SpiritsView, { initialState as spiritsViewInitialState } from "./spirits/spiritsView";
 import { SpiritsViewState } from "./spirits/spiritData";
@@ -19,35 +19,46 @@ interface AppState {
   invaderView: InvadersViewState;
 }
 
-export default class App extends React.Component<any, AppState> {
-  constructor(props: any) {
-      super(props);
-      this.state = {spiritView: spiritsViewInitialState(), invaderView: invadersViewInitialState()};
+export default function App({_}: any) {
+  const location = useLocation();
+  const [state, setState] = useState<AppState>({spiritView: spiritsViewInitialState(), invaderView: invadersViewInitialState()});
+
+  function getRouteTheme(): React.CSSProperties {
+    let color;
+    switch(location.pathname as string) {
+      case "/spirits": {
+        color = "#0076ad";
+        break;
+      }
+      case "/invaders": {
+        color = "#911616";
+        break;
+      }
+      default: {
+        color = "#999999"
+      }
+    }
+    return {"--theme-color": color} as React.CSSProperties;
   }
-  render() {
-    return (
-      <Router>
-        <div className="app">
-          <DndProvider backend={HTML5Backend}>
-            <Navbar />
-            <Switch>
-              <Route exact path="/" render = {() => {return (<Redirect to="/spirits" />)}} />
-              <Route path="/spirits">
-                <SpiritsView state={this.state.spiritView} updateState={(update) => {
-                  this.setState((prev) => ({...prev, spiritView: update}))
-                }} />
-              </Route>
-              <Route path="/invaders">
-                <InvadersView state={this.state.invaderView} updateState={(update) => {
-                  this.setState((prev) => ({...prev, invaderView: update}))
-                }} />
-              </Route>
-            </Switch>
-          </DndProvider>
-        </div>
-        
-        
-      </Router>
-    )
-  }
+
+  return (
+    <div className="app" style={getRouteTheme()}>
+      <DndProvider backend={HTML5Backend}>
+        <Navbar />
+        <Switch>
+          <Route exact path="/" render = {() => {return (<Redirect to="/spirits" />)}} />
+          <Route path="/spirits">
+            <SpiritsView state={state.spiritView} updateState={(update) => {
+              setState((prev) => ({...prev, spiritView: update, invaderView: {...prev.invaderView, expansionsToShow: update.expansionsToShow}}))
+            }} />
+          </Route>
+          <Route path="/invaders">
+            <InvadersView state={state.invaderView} updateState={(update) => {
+              setState((prev) => ({...prev, invaderView: update, spiritView: {...prev.spiritView, expansionsToShow: update.expansionsToShow}}))
+            }} />
+          </Route>
+        </Switch>
+      </DndProvider>
+    </div>
+  )
 }

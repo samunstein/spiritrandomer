@@ -1,6 +1,6 @@
 .spirit-panel {
     width: 135px;
-    border: 1px solid var(--color-spirit-blue);
+    border: 1px solid var(--theme-color);
     margin: 5px;
 
     position: relative;

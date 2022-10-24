@@ -9,7 +9,7 @@ export default function AdversaryPanel({data, dim, onClick, chosenDifficulty, ch
 
     return (
         <div onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} className={`rule-panel ${dim ? "dim" : ""}`}>
-            <div className="rule-name">{data.name}{(chosenDifficulty !== undefined) ? `, ${chosenDifficulty ? `Level: ${chosenDifficulty}` : `Base`}` : <></>}</div>
+            <div className="rule-name">{data.name}{(chosenDifficulty !== undefined) ? `, Level: ${chosenDifficulty ? `${chosenDifficulty}` : `Base`}` : <></>}</div>
             <div className="rule-data">
                 <img className={hover ? "hover" : ""} src={`/invaderImages/${data.image}`}></img>    
                 {hover ? 

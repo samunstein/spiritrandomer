@@ -10,7 +10,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --color-spirit-blue: rgb(0, 118, 173);
+  --theme-color: rgb(0, 118, 173);
 }
 
 code {

@@ -1,4 +1,4 @@
-import { Expansion, expansionList, maxDecimal } from "../globals";
+import { chooseRandom, Expansion, expansionList, getRandomInt, maxDecimal } from "../globals";
 import { Complexity, complexityList, getMajorStatList, getStatColor, MAX_STAT, SpiritData, spirits, SpiritState, SpiritsViewState, Stat, statList } from "./spiritData";
 import Spirit from "./spiritPanel"
 import "./spiritsView.css";
@@ -133,12 +133,6 @@ function SpiritsView({state, updateState}: StateProps) {
         return state.available.filter(filterSpiritByShowParameters).filter(spirit => !spirit.disabled);
     }
 
-    function getRandomInt(min: number, max: number) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
-    }
-
     function calculateWouldBeMAD(chosen: Array<SpiritState>, spirit: SpiritState): number {
         const stats = statList.map(stat => getSpiritsStatAverage(stat, [...chosen, spirit]));
         return meanAvgDev(stats);
@@ -151,8 +145,8 @@ function SpiritsView({state, updateState}: StateProps) {
 
     function chooseFullRandom(chosen: Array<SpiritState>, available: Array<SpiritState>): void {
         if (available.length > 0) {
-            const i = getRandomInt(0, available.length);
-            mutableChoose(chosen, available, available[i]);
+            const choice = chooseRandom(available);
+            mutableChoose(chosen, available, choice);
         }
     }
 
@@ -168,8 +162,8 @@ function SpiritsView({state, updateState}: StateProps) {
             }
 
             if (wouldBeAcceptable.length > 0) {
-                const i = getRandomInt(0, wouldBeAcceptable.length);
-                mutableChoose(chosen, available, wouldBeAcceptable[i].spirit);
+                const choice = chooseRandom(wouldBeAcceptable);
+                mutableChoose(chosen, available, choice.spirit);
             } else {
                 
                 wouldBeMADValues.sort((a, b) => a.mad - b.mad);
