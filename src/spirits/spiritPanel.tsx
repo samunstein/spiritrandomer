@@ -4,7 +4,7 @@ import { getStatColor, MAX_STAT, SpiritData, Stat, statList } from "./spiritData
 import "./spiritPanel.css";
 import { useDrag } from 'react-dnd';
 
-export default function Spirit({spiritData, dim, onClick}: {spiritData: SpiritData, dim: boolean, onClick: () => void}) {
+export default function Spirit({spiritData, dim, onClick}: {spiritData: SpiritData, dim: boolean, onClick: (event: React.MouseEvent<HTMLElement>) => void}) {
     const [hover, setHover] = useState(false);
 
     function getStatDivStyle(stat: Stat): React.CSSProperties {

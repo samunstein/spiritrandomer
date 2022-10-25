@@ -1,11 +1,11 @@
+import { isMobile } from 'react-device-detect';
+import { getTrackBackground, Range as InputRange } from 'react-range';
 import { chooseRandom, Expansion, expansionList } from "../globals";
 import AdversaryPanel from "./adversaryPanel";
 import InvaderDropArea from "./dropArea";
-import { adversaries, Adversary, ChosenAdversary, InvadersViewState, RuleState, RuleType, Scenario, scenarios, showableRulesList } from "./invaderData";
-import ScenarioPanel from "./scenarioPanel";
-import { getTrackBackground, Range as InputRange } from 'react-range';
-import { strictEqual } from "assert";
+import { adversaries, Adversary, ChosenAdversary, InvadersSaveState, InvadersViewState, RuleState, RuleType, Scenario, scenarios, showableRulesList } from "./invaderData";
 import "./invadersView.css";
+import ScenarioPanel from "./scenarioPanel";
 
 interface StateProps {
     state: InvadersViewState;
@@ -22,6 +22,24 @@ export function initialState(): InvadersViewState {
         difficultySlider: {min: DIFFICULTY_MIN, max: DIFFICULTY_MAX},
         rulesToShow: showableRulesList.filter(r => r !== RuleType.SpecialScenario),
         expansionsToShow: expansionList
+    };
+}
+
+export function toSaveState(state: InvadersViewState): InvadersSaveState {
+    return {
+        difficultySlider: state.difficultySlider,
+        rulesToShow: state.rulesToShow,
+        expansionsToShow: state.expansionsToShow
+    };
+}
+
+export function fromSaveState(saved: InvadersSaveState): InvadersViewState {
+    const initial = initialState()
+    return {
+        ...initial,
+        ...saved,
+        available: initial.available,
+        chosen: initial.chosen
     };
 }
 
@@ -152,7 +170,10 @@ function InvadersView({state, updateState}: StateProps) {
         }
     }
 
-    function flipDisabled(toFlip: RuleState): void {
+    function maybeFlipDisabled(event: React.MouseEvent<HTMLElement>, toFlip: RuleState): void {
+        // Don't disable on single click on mobile, since that is used for hover
+        if (isMobile && event.detail === 1) return;
+
         updateState({...state, available: state.available.map(rule => {
             if (rule.data.name !== toFlip.data.name) {
                 return rule;
@@ -196,11 +217,11 @@ function InvadersView({state, updateState}: StateProps) {
                     <div className="unchosen-area">
                         {state.available.filter(filterRulesByShowParameters).map(rule => {switch(rule.data.type) {
                             case RuleType.Adversary: {
-                                return <AdversaryPanel data={rule.data} dim={rule.disabled} onClick={() => flipDisabled(rule)} />
+                                return <AdversaryPanel data={rule.data} dim={rule.disabled} onClick={(event:React.MouseEvent<HTMLElement>) => maybeFlipDisabled(event, rule)} />
                             }
                             case RuleType.SpecialScenario:
                             case RuleType.Scenario: {
-                                return <ScenarioPanel data={rule.data} dim={rule.disabled} onClick={() => flipDisabled(rule)} />
+                                return <ScenarioPanel data={rule.data} dim={rule.disabled} onClick={(event: React.MouseEvent<HTMLElement>) => maybeFlipDisabled(event, rule)} />
                             }
                         }})}
                     </div>

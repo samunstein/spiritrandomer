@@ -1,10 +1,10 @@
 import { useState } from "react";
-import "./rulePanel.css";
-import { Adversary } from "./invaderData";
 import AdversaryDifficultyBox from "./adversaryDifficultyBox";
+import { Adversary } from "./invaderData";
+import "./rulePanel.css";
 
 export default function AdversaryPanel({data, dim, onClick, chosenDifficulty, changeLevel}: 
-    {data: Adversary, dim: boolean, onClick: () => void, chosenDifficulty?: number, changeLevel?: (level: number) => void}) {
+    {data: Adversary, dim: boolean, onClick: (event: React.MouseEvent<HTMLElement>) => void, chosenDifficulty?: number, changeLevel?: (level: number) => void}) {
     const [hover, setHover] = useState(false);
 
     return (

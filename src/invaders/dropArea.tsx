@@ -1,5 +1,5 @@
-import { useDrop } from 'react-dnd'
-import { InvadersViewState } from './invaderData'
+import { useDrop } from 'react-dnd';
+import { InvadersViewState } from './invaderData';
 
 export default function InvaderDropArea({children, dropFn, state}: {
     children?: 

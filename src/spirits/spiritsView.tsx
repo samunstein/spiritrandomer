@@ -1,10 +1,9 @@
-import { chooseRandom, Expansion, expansionList, getRandomInt, maxDecimal } from "../globals";
-import { Complexity, complexityList, getMajorStatList, getStatColor, MAX_STAT, SpiritData, spirits, SpiritState, SpiritsViewState, Stat, statList } from "./spiritData";
-import Spirit from "./spiritPanel"
-import "./spiritsView.css";
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
+import { isMobile } from "react-device-detect";
+import { chooseRandom, Expansion, expansionList, maxDecimal } from "../globals";
 import SpiritDropArea from "./dropArea";
+import { Complexity, complexityList, getMajorStatList, getStatColor, MAX_STAT, spirits, SpiritsSaveState, SpiritState, SpiritsViewState, Stat, statList } from "./spiritData";
+import Spirit from "./spiritPanel";
+import "./spiritsView.css";
 
 const MAD_SLIDER_SMOOTHNESS = 40;
 
@@ -21,20 +20,41 @@ export function initialState(): SpiritsViewState {
     };
 }
 
+export function toSaveState(state: SpiritsViewState): SpiritsSaveState {
+    return {
+        madSliderRawValue: state.madSliderRawValue,
+        randomTowardsBalance: state.randomTowardsBalance, 
+        numberOfSpiritsToRandomize: state.numberOfSpiritsToRandomize,
+        complexitiesToShow: state.complexitiesToShow,
+        prominentStatsToShow: state.prominentStatsToShow,
+        expansionsToShow: state.expansionsToShow
+    };
+}
+
+export function fromSaveState(saved: SpiritsSaveState): SpiritsViewState {
+    const initial = initialState()
+    return {
+        ...initial,
+        ...saved,
+        available: initial.available,
+        chosen: initial.chosen,
+        
+    };
+}
+
 interface StateProps {
     state: SpiritsViewState;
     updateState: (newState: SpiritsViewState) => void
 }
 
 function SpiritsView({state, updateState}: StateProps) {
-    function flipDisabled(toFlip: SpiritState) {
+    function maybeFlipDisabled(event: React.MouseEvent<HTMLElement>, toFlip: SpiritState) {
+        // Don't disable on single click on mobile, since that is used for hover
+        if (isMobile && event.detail === 1) return;
+
         updateState({
             ...state,
             available: state.available.map(spirit => {
-                if (spirit !== toFlip) return spirit
-                else return {...spirit, disabled: !spirit.disabled};
-            }),
-            chosen: state.chosen.map(spirit => {
                 if (spirit !== toFlip) return spirit
                 else return {...spirit, disabled: !spirit.disabled};
             })
@@ -256,7 +276,7 @@ function SpiritsView({state, updateState}: StateProps) {
                 </div>
                 <SpiritDropArea state={state} dropFn={(name: string) => unchoose(name)}>
                     <div className="unchosen-area">
-                        {state.available.filter(filterSpiritByShowParameters).map((spirit: SpiritState) => <Spirit spiritData={spirit.data} dim={spirit.disabled} onClick={() => flipDisabled(spirit)} />)}
+                        {state.available.filter(filterSpiritByShowParameters).map((spirit: SpiritState) => <Spirit spiritData={spirit.data} dim={spirit.disabled} onClick={(event: React.MouseEvent<HTMLElement>) => maybeFlipDisabled(event, spirit)} />)}
                     </div>
                 </SpiritDropArea>
             </div>

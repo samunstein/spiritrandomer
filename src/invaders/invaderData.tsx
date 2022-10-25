@@ -71,3 +71,12 @@ export interface InvadersViewState {
     rulesToShow: ReadonlyArray<RuleType>;
     expansionsToShow: ReadonlyArray<Expansion>;
 };
+
+export interface InvadersSaveState {
+    difficultySlider: {
+        min: number;
+        max: number;
+    };
+    rulesToShow: ReadonlyArray<RuleType>;
+    expansionsToShow: ReadonlyArray<Expansion>;
+};

@@ -118,3 +118,12 @@ export interface SpiritsViewState {
     prominentStatsToShow: ReadonlyArray<Stat>;
     expansionsToShow: ReadonlyArray<Expansion>;
 }
+
+export interface SpiritsSaveState {
+    madSliderRawValue: number;
+    randomTowardsBalance: boolean;
+    numberOfSpiritsToRandomize: number;
+    complexitiesToShow: ReadonlyArray<Complexity>;
+    prominentStatsToShow: ReadonlyArray<Stat>;
+    expansionsToShow: ReadonlyArray<Expansion>;
+}

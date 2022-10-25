@@ -1,11 +1,10 @@
 import { useState } from "react";
+import { useDrag } from "react-dnd";
+import { Scenario } from "./invaderData";
 import "./rulePanel.css";
-import { Adversary, Scenario } from "./invaderData";
-import AdversaryDifficultyBox from "./adversaryDifficultyBox";
-import {useDrag} from "react-dnd";
 
 export default function AdversaryPanel({data, dim, onClick}: 
-    {data: Scenario, dim: boolean, onClick: () => void}) {
+    {data: Scenario, dim: boolean, onClick: (event: React.MouseEvent<HTMLElement>) => void}) {
     const [hover, setHover] = useState(false);
 
     const [{isDragging}, drag] = useDrag(() => ({

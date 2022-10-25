@@ -1,7 +1,7 @@
 import { useState } from "react";
-import "./rulePanel.css";
 import { useDrag } from 'react-dnd';
 import { Adversary } from "./invaderData";
+import "./rulePanel.css";
 
 export default function AdversaryDifficultyBox({data, level, onClick}: {data: Adversary, level: number, onClick: () => void}) {
     const [hover, setHover] = useState(false);

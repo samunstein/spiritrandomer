@@ -1,5 +1,5 @@
-import { useDrop } from 'react-dnd'
-import { SpiritsViewState } from './spiritData'
+import { useDrop } from 'react-dnd';
+import { SpiritsViewState } from './spiritData';
 
 export default function SpiritDropArea({children, dropFn, state}: {
     children?: 
