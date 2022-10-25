@@ -79,4 +79,5 @@ export interface InvadersSaveState {
     };
     rulesToShow: ReadonlyArray<RuleType>;
     expansionsToShow: ReadonlyArray<Expansion>;
+    disabled?: ReadonlyArray<string>;
 };

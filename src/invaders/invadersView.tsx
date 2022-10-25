@@ -29,16 +29,19 @@ export function toSaveState(state: InvadersViewState): InvadersSaveState {
     return {
         difficultySlider: state.difficultySlider,
         rulesToShow: state.rulesToShow,
-        expansionsToShow: state.expansionsToShow
+        expansionsToShow: state.expansionsToShow,
+        disabled: state.available.filter(av => av.disabled).map(av => av.data.name)
     };
 }
 
 export function fromSaveState(saved: InvadersSaveState): InvadersViewState {
-    const initial = initialState()
+    const initial = initialState();
+    const disabled = saved.disabled || [];
     return {
-        ...initial,
-        ...saved,
-        available: initial.available,
+        difficultySlider: saved.difficultySlider,
+        rulesToShow: saved.rulesToShow,
+        expansionsToShow: saved.expansionsToShow,
+        available: initial.available.map(rule => disabled.includes(rule.data.name) ? {...rule, disabled: true} : rule),
         chosen: initial.chosen
     };
 }

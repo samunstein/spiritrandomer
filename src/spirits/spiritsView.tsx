@@ -27,18 +27,23 @@ export function toSaveState(state: SpiritsViewState): SpiritsSaveState {
         numberOfSpiritsToRandomize: state.numberOfSpiritsToRandomize,
         complexitiesToShow: state.complexitiesToShow,
         prominentStatsToShow: state.prominentStatsToShow,
-        expansionsToShow: state.expansionsToShow
+        expansionsToShow: state.expansionsToShow,
+        disabled: state.available.filter(spirit => spirit.disabled).map(spirit => spirit.data.name)
     };
 }
 
 export function fromSaveState(saved: SpiritsSaveState): SpiritsViewState {
     const initial = initialState()
+    const disabled = saved.disabled || [];
     return {
-        ...initial,
-        ...saved,
-        available: initial.available,
+        madSliderRawValue: saved.madSliderRawValue,
+        randomTowardsBalance: saved.randomTowardsBalance,
+        numberOfSpiritsToRandomize: saved.numberOfSpiritsToRandomize,
+        complexitiesToShow: saved.complexitiesToShow,
+        prominentStatsToShow: saved.prominentStatsToShow,
+        expansionsToShow: saved.expansionsToShow,
+        available: initial.available.map(spirit => disabled.includes(spirit.data.name) ? {...spirit, disabled: true} : spirit ),
         chosen: initial.chosen,
-        
     };
 }
 

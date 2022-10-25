@@ -126,4 +126,5 @@ export interface SpiritsSaveState {
     complexitiesToShow: ReadonlyArray<Complexity>;
     prominentStatsToShow: ReadonlyArray<Stat>;
     expansionsToShow: ReadonlyArray<Expansion>;
+    disabled?: ReadonlyArray<string>;
 }
