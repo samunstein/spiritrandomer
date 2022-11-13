@@ -54,7 +54,8 @@ export const statList = Object.values(Stat);
 
 export function getMajorStatList(stats: Stats): ReadonlyArray<Stat> {
     const epsilon = 0.00001;
-    return statList.filter(stat => stats[stat] >= MAX_STAT / 2 - epsilon);
+    const maxOwn = Math.max(...statList.map(stat => stats[stat]));
+    return statList.filter(stat => stats[stat] >= MAX_STAT / 2 - epsilon || stats[stat] >= maxOwn - epsilon);
 };
 
 export enum Complexity {
